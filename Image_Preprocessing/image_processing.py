@@ -3,7 +3,7 @@ import cv2
 
 def func(path):    
     frame = cv2.imread(path)
-    frame = cv2.resize(frame,(96,96))
+    # frame = cv2.resize(frame,(96,96))
     # downsize it to reduce processing time
     #cv2.imshow("original",frame)
     converted = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV) # Convert from RGB to HSV
@@ -41,16 +41,21 @@ def func(path):
     bw_image = cv2.cvtColor(skin, cv2.COLOR_BGR2GRAY)  # Convert image from BGR to gray format
     bw_image = cv2.GaussianBlur(bw_image,(5,5),0)  # Highlight the main object
     threshold = 1
+    # cv2.imshow("bw_image",bw_image)
     for i in range(h):
         for j in range(w):
             if bw_image[i][j] > threshold:
                bw_image[i][j] = 0
             else:
                bw_image[i][j] = 255
+    # cv2.imshow("bw_image1",bw_image)
+    
 
 
     #cv2.imshow("thresholded",bw_image)
-    #cv2.waitKey(0)
+    cv2.waitKey(0)
     cv2.destroyAllWindows()
     return bw_image
 
+# path = r"C:\Users\FPCC\hand_gesture_project\dataset\A\001.jpg"
+# bw_image =func(path)

@@ -48,7 +48,7 @@ with open(r'C:\Users\FPCC\hand_gesture_project\dataset\train60.csv', 'a') as csv
                         # actual_path is path for different image for every iteration
                         actual_path=path+"\\\\"+dirname+"\\\\"+file
                         print(actual_path)
-                        # this func() is that we defined in surf_image_processing.py
+                        # this func() is that we defined in sift_image_processing.py
                         bw_image=func(actual_path)
                         # flatten() for convert bw_image to vector with one dimension
                         # ex: (639, 128) => (639*128) = (81792,)

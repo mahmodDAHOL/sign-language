@@ -40,9 +40,9 @@ def func(path):
     # see https://www.geeksforgeeks.org/python-opencv-canny-function/
     img2 = cv2.Canny(skin, 60, 60)
 
-    # initializing surf algorithm that extract descriptors that we will use them for training
+    # initializing sift algorithm that extract descriptors that we will use them for training
     # classification model
-    surf = cv2.xfeatures2d.SIFT_create()
+    sift = cv2.xfeatures2d.SIFT_create()
     # resizing
     img2 = cv2.resize(img2, (256, 256))
 
@@ -50,7 +50,7 @@ def func(path):
     # it return des variable (descriptors) list of points that describe the feature of image
     # and kp variable (keypoits) that will show on image as points
     # for more info see https://www.youtube.com/watch?v=DZtUt4bKtmY
-    kp, des = surf.detectAndCompute(img2, None)
+    kp, des = sift.detectAndCompute(img2, None)
 
     # drawKeypoints method for draw the points (des) on the image
     img2 = cv2.drawKeypoints(img2, kp, None, (0, 0, 255), 4)

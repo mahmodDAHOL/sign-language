@@ -1,21 +1,22 @@
-import numpy as np
-import cv2
-import os
+#https://kushalvyas.github.io/BOV.html
+
 import csv
-import sklearn.metrics as sm
-from surf_image_processing import func,func2
-from sklearn.cluster import MiniBatchKMeans
-from sklearn.svm import SVC
-from sklearn.grid_search import GridSearchCV
+import os
+import pickle
 import random
 import warnings
-import pickle
-from sklearn.naive_bayes import GaussianNB as nb
-from sklearn.neighbors import KNeighborsClassifier as knn
-from sklearn.linear_model import LogisticRegression as lr
-from sklearn.neural_network import MLPClassifier as mlp
+
+import cv2
 import numpy as np
 import sklearn.metrics as sm
+from sift_image_processing import func
+from sklearn.cluster import MiniBatchKMeans
+from sklearn.model_selection  import GridSearchCV
+from sklearn.linear_model import LogisticRegression as lr
+from sklearn.naive_bayes import GaussianNB as nb
+from sklearn.neighbors import KNeighborsClassifier as knn
+from sklearn.neural_network import MLPClassifier as mlp
+from sklearn.svm import SVC
 
 #initialise
 path="train"
@@ -72,7 +73,7 @@ def train_test_val_split_idxs(total_rows, percent_test, percent_val):
     # remove validation indexes
     training_idxs = [idx for idx in row_range if idx not in val_idxs]
 
-    print('Train-test-val split: %i training rows, %i test rows, %i validation rows' % (len(training_idxs), len(test_idxs), len(val_idxs)))
+    # print('Train-test-val split: %i training rows, %i test rows, %i validation rows' % (len(training_idxs), len(test_idxs), len(val_idxs)))
 
     return training_idxs, test_idxs, val_idxs
 
@@ -106,6 +107,7 @@ def cluster_features(img_descs, training_idxs, cluster_model):
     # Concatenate all descriptors in the training set together
     training_descs = [img_descs[i] for i in training_idxs]
     all_train_descriptors = [desc for desc_list in training_descs for desc in desc_list]
+
     all_train_descriptors = np.array(all_train_descriptors)
 
 
@@ -121,10 +123,12 @@ def cluster_features(img_descs, training_idxs, cluster_model):
 
     # compute set of cluster-reduced words for each image
     img_clustered_words = [cluster_model.predict(raw_words) for raw_words in img_descs]
+    print(img_clustered_words)
 
     # finally make a histogram of clustered word counts for each image. These are the final features.
     img_bow_hist = np.array(
         [np.bincount(clustered_words, minlength=n_clusters) for clustered_words in img_clustered_words])
+    print(img_bow_hist)
 
     X = img_bow_hist
     print ('done generating BoW histograms.')
@@ -143,7 +147,7 @@ def predict_svm(X_train, X_test, y_train, y_test):
     svc.fit(X_train,y_train)
     y_pred=svc.predict(X_test)
     calc_accuracy("SVM",y_test,y_pred)
-    np.savetxt('submission_surf_svm.csv', np.c_[range(1,len(y_test)+1),y_pred,y_test], delimiter=',', header = 'ImageId,Label,TrueLabel', comments = '', fmt='%d')
+    np.savetxt('submission_sift_svm.csv', np.c_[range(1,len(y_test)+1),y_pred,y_test], delimiter=',', header = 'ImageId,Label,TrueLabel', comments = '', fmt='%d')
     
 
 def predict_lr(X_train, X_test, y_train, y_test):
@@ -152,7 +156,7 @@ def predict_lr(X_train, X_test, y_train, y_test):
     clf.fit(X_train,y_train)
     y_pred=clf.predict(X_test)
     calc_accuracy("Logistic regression",y_test,y_pred)
-    np.savetxt('submission_surf_lr.csv', np.c_[range(1,len(y_test)+1),y_pred,y_test], delimiter=',', header = 'ImageId,Label,TrueLabel', comments = '', fmt='%d')
+    np.savetxt('submission_sift_lr.csv', np.c_[range(1,len(y_test)+1),y_pred,y_test], delimiter=',', header = 'ImageId,Label,TrueLabel', comments = '', fmt='%d')
     
 
 
@@ -162,7 +166,7 @@ def predict_nb(X_train, X_test, y_train, y_test):
     clf.fit(X_train,y_train)
     y_pred=clf.predict(X_test)
     calc_accuracy("Naive Bayes",y_test,y_pred)
-    np.savetxt('submission_surf_nb.csv', np.c_[range(1,len(y_test)+1),y_pred,y_test], delimiter=',', header = 'ImageId,Label,TrueLabel', comments = '', fmt='%d')
+    np.savetxt('submission_sift_nb.csv', np.c_[range(1,len(y_test)+1),y_pred,y_test], delimiter=',', header = 'ImageId,Label,TrueLabel', comments = '', fmt='%d')
     
 
 
@@ -172,7 +176,7 @@ def predict_knn(X_train, X_test, y_train, y_test):
     clf.fit(X_train,y_train)
     y_pred=clf.predict(X_test)
     calc_accuracy("K nearest neighbours",y_test,y_pred)
-    np.savetxt('submission_surf_knn.csv', np.c_[range(1,len(y_test)+1),y_pred,y_test], delimiter=',', header = 'ImageId,Label,TrueLabel', comments = '', fmt='%d')
+    np.savetxt('submission_sift_knn.csv', np.c_[range(1,len(y_test)+1),y_pred,y_test], delimiter=',', header = 'ImageId,Label,TrueLabel', comments = '', fmt='%d')
     
 
 def predict_mlp(X_train, X_test, y_train, y_test):
@@ -182,6 +186,8 @@ def predict_mlp(X_train, X_test, y_train, y_test):
     y_pred=clf.predict(X_test)
     calc_accuracy("MLP classifier",y_test,y_pred)
 
+path = r"C:\Users\FPCC\hand_gesture_project\dataset"
+
 #creating desc for each file with label
 for (dirpath,dirnames,filenames) in os.walk(path):
     for dirname in dirnames:
@@ -189,7 +195,7 @@ for (dirpath,dirnames,filenames) in os.walk(path):
         for(direcpath,direcnames,files) in os.walk(path+"\\"+dirname):
             for file in files:
                 actual_path=path+"\\\\"+dirname+"\\\\"+file
-                print(actual_path)
+                # print(actual_path)
                 des=func(actual_path)
                 img_descs.append(des)
                 y.append(label)
@@ -206,12 +212,12 @@ X, cluster_model = cluster_features(img_descs, training_idxs, MiniBatchKMeans(n_
 X_train, X_test, X_val, y_train, y_test, y_val = perform_data_split(X, y, training_idxs, test_idxs, val_idxs)
 
 
-#using classification methods
-predict_knn(X_train, X_test,y_train, y_test)
-#predict_mlp(X_train, X_test,y_train, y_test)
-predict_svm(X_train, X_test,y_train, y_test)
+# #using classification methods
+# predict_knn(X_train, X_test,y_train, y_test)
+# predict_mlp(X_train, X_test,y_train, y_test)
+# predict_svm(X_train, X_test,y_train, y_test)
 
-predict_lr(X_train, X_test,y_train, y_test)
-predict_nb(X_train, X_test,y_train, y_test)
+# predict_lr(X_train, X_test,y_train, y_test)
+# predict_nb(X_train, X_test,y_train, y_test)
 
 

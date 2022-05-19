@@ -27,8 +27,8 @@ Now, using ```pip install``` command, include following dependencies
 To run the project, perform following steps -
 
 1. Take the dataset folder and all the required python files and put them in the same folder.
-2. Required files are - surf_image_processing.py(Image preprocessing folder), preprocessing_surf.py (Bag of features folder), classification.py(classification folder) and visualize_submissions.py(visualization folder). 
-3. Run the preprocessing_surf.py file to make the csv file of training data set.
+2. Required files are - sift_image_processing.py(Image preprocessing folder), preprocessing_sift.py (Bag of features folder), classification.py(classification folder) and visualize_submissions.py(visualization folder). 
+3. Run the preprocessing_sift.py file to make the csv file of training data set.
 4. classification.py contains the code for svm, knn and many other classifiers.
 5. cnn.py contains the code for deep learning as the name suggests. 
 
@@ -53,14 +53,14 @@ The main objective of the segmentation phase is to remove the background and noi
   <br>
   
 #### Feature Extraction:
-The Speeded Up Robust Feature (SURF) technique is used to extract descriptors from the segmented hand gesture images. SURF is a novel feature extraction method which is robust against rotation, scaling, occlusion and variation in viewpoint.
+The Speeded Up Robust Feature (sift) technique is used to extract descriptors from the segmented hand gesture images. sift is a novel feature extraction method which is robust against rotation, scaling, occlusion and variation in viewpoint.
 <p align="center">
   <br>
-  <img align="center" src="https://github.com/imRishabhGupta/Indian-Sign-Language-Recognition/blob/master/Processed_images/SURF_D.png">
+  <img align="center" src="https://github.com/imRishabhGupta/Indian-Sign-Language-Recognition/blob/master/Processed_images/sift_D.png">
 </p>
 
 ### Classification
-The SURF descriptors extracted from each image are different in number with the same dimension (64). However, a multiclass SVM requires uniform dimensions of feature vector as its input. Bag of Features (BoF) is therefore implemented to represent the features in histogram of visual vocabulary rather than the features as proposed. The descriptors extracted are first quantized into 150 clusters using K-means clustering. Given a set of descriptors, where K-means clustering categorizes numbers of descriptors into K numbers of cluster center.
+The sift descriptors extracted from each image are different in number with the same dimension (64). However, a multiclass SVM requires uniform dimensions of feature vector as its input. Bag of Features (BoF) is therefore implemented to represent the features in histogram of visual vocabulary rather than the features as proposed. The descriptors extracted are first quantized into 150 clusters using K-means clustering. Given a set of descriptors, where K-means clustering categorizes numbers of descriptors into K numbers of cluster center.
 
 The clustered features then form the visual vocabulary where each feature corresponds to an individual sign language gesture. With the visual vocabulary, each image is represented by the frequency of occurrence of all clustered features. BoF represents each image as a histogram of features, in this case the histogram of 24 classes of sign languages gestures. 
 
@@ -88,19 +88,19 @@ After obtaining the baf of features model, we are set to predict results for new
 ### Results
 Results can be visualized by running file [visualize_submissions.py](https://github.com/imRishabhGupta/Indian-Sign-Language-Recognition/blob/master/Visualization/visualize_submissions.py).
 
-#### Accuracy without SURF
+#### Accuracy without sift
 
 <p align="center">
   <br>
-  <img align="center" src="https://github.com/imRishabhGupta/Indian-Sign-Language-Recognition/blob/master/Visualization/accuracy_without_surf.png">
+  <img align="center" src="https://github.com/imRishabhGupta/Indian-Sign-Language-Recognition/blob/master/Visualization/accuracy_without_sift.png">
         <br>  
   </p>
   
-#### Accuracy with SURF
+#### Accuracy with sift
 
 <p align="center">
   <br>
-  <img align="center" src="https://github.com/imRishabhGupta/Indian-Sign-Language-Recognition/blob/master/Visualization/acuracy_with_surf.png">
+  <img align="center" src="https://github.com/imRishabhGupta/Indian-Sign-Language-Recognition/blob/master/Visualization/acuracy_with_sift.png">
 </p>
 
 ### Credits
