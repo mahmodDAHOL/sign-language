@@ -1,19 +1,32 @@
-import numpy as np
+import os
 import cv2
-from matplotlib import pyplot as plt
+from pathlib import Path
+from visualize_submissions import savefig
+import numpy as np
+from sklearn.cluster import MiniBatchKMeans
+
+from data_manipulation import DataManipulation
+from ml_algorithms import MLAlgorithms
+
+project_path = r"C:\Users\FPCC\New folder"
+dataset_path = os.path.join(project_path, "dataset")
+
+label = 0
+img_descs = []
+y = []
+
 
 # this function take path for image and return descriptors list of that image
-
-
-def func(path):
+def extract_sift(path):
     frame = cv2.imread(path)
+
     frame = cv2.resize(frame, (128, 128))
 
     # convert image from RGB to gray  (8 bit for every pixel)
     converted2 = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
     # convert image from RGB to HSV  (HSV is a color model that
-#                                     less sensitive to shadow in the image)
+    #                                less sensitive to shadow in the image)
     converted = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
     # lowerBoundary and upperBoundary are values that have been experimented by the author
@@ -54,17 +67,55 @@ def func(path):
 
     # drawKeypoints method for draw the points (des) on the image
     img2 = cv2.drawKeypoints(img2, kp, None, (0, 0, 255), 4)
-    # plt.imshow(img2), plt.show()
 
-    # cv2.waitKey(0)
-    # cv2.destroyAllWindows()
-
-    # print number of descriptors
-    print("length of descriptor is "+str(len(des)))
     return des
 
-### this code below for print the maximum number of features in dataset
-# path = r"C:\Users\FPCC\hand_gesture_project\dataset"
+
+# creating desc for each file with label
+for train_test in ["train", "test"]:
+    for (dirpath, dirnames, filenames) in os.walk(os.path.join(dataset_path, train_test)):
+        for dirname in dirnames:
+            print(dirname)
+            for(direcpath, direcnames, files) in os.walk(os.path.join(dataset_path, train_test, dirname)):
+                for file in files:
+                    actual_path = os.path.join(
+                        dataset_path, train_test, dirname, file)
+                    des = extract_sift(actual_path)
+                    img_descs.append(des)
+                    y.append(label)
+            label = label+1
+
+# finding indexes of test train and validate
+y = np.array(y)
+data = DataManipulation(0.2,0, project_path)
+data.train_test_val_split_idxs(len(img_descs))
+
+# creating histogram using kmeans minibatch cluster model
+model = MiniBatchKMeans(batch_size=1024, n_clusters=150)
+X = data.cluster_features(img_descs, model)
+
+# splitting data into test, train, validate using the indexes
+X_train, X_test, X_val, y_train, y_test, y_val = data.perform_data_split(X, y)
+
+algorithm = MLAlgorithms(project_path, 32, 30)
+# using classification methods
+algorithm.predict_knn(X_train, X_test, y_train, y_test)
+algorithm.predict_mlp(X_train, X_test, y_train, y_test)
+algorithm.predict_svm(X_train, X_test, y_train, y_test)
+
+algorithm.predict_lr(X_train, X_test, y_train, y_test)
+algorithm.predict_nb(X_train, X_test, y_train, y_test)
+
+algorithm.predict_cnn(project_path)
+
+# save confusion matrix figures for test data 
+true_false_files = Path(f"{project_path}\\true_false_files") 
+results_path = f"{project_path}\\results"
+
+savefig(true_false_files, results_path)
+
+# this code below for print the maximum number of features in dataset
+# path = f"{project_path}\\dataset"
 # max = 0
 # for (dirpath,dirnames,filenames) in os.walk(path):
 #     for dirname in dirnames:
@@ -80,5 +131,5 @@ def func(path):
 #                 des = func(actual_path)
 #                 if des.flatten().shape[0]>max:
 #                     max = des.flatten().shape[0]
-                
+
 # print(max)
